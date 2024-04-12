@@ -1,0 +1,12 @@
+{
+  "name": "shrimpz-lottery",
+  "version": "1.0.0",
+  "description": "A lottery system implemented on the Ethereum blockchain.",
+  "main": "endLottery.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "web3": "^1.7.0"
+  }
+}
