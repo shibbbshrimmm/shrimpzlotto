@@ -482,7 +482,6 @@ const contractABI = [
 		"stateMutability": "view",
 		"type": "function"
 	}
-
 ];
 
 const tokenABI = [
@@ -871,7 +870,7 @@ const tokenABI = [
 	}
 ];
  
-const contractAddress = '0xaB7ac44dc09FB927d072CB7DdE328c49034dDa1b';
+const contractAddress = '0x41756DEbAec28046654999b309259Fe46A4c1957';
 const tokenAddress = '0x4633841377513350FAF72Efc3c6e6f94F3BDD0F8'; // ERC20 token address used for the lottery
 
 let contractInstance;
