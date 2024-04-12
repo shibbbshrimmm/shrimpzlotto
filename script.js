@@ -876,12 +876,29 @@ const buyTicketButton = document.getElementById('buyTicketButton');
 
 connectButton.addEventListener('click', async () => {
     try {
-        // Request account access if needed
         await window.ethereum.request({ method: 'eth_requestAccounts' });
         const web3 = new Web3(window.ethereum);
+        const accounts = await web3.eth.getAccounts();
+        if (!accounts || accounts.length === 0) {
+            console.error('No accounts found');
+            return;
+        }
+        
+        web3.eth.defaultAccount = accounts[0];
         contractInstance = new web3.eth.Contract(contractABI, contractAddress);
         tokenInstance = new web3.eth.Contract(tokenABI, tokenAddress);
         ticketSection.classList.remove('hidden');
+
+        // Check if the contract has enough allowance for at least one ticket
+        const ticketPriceWei = web3.utils.toWei('100', 'ether'); // Assume ticket price is set
+        const allowance = await tokenInstance.methods.allowance(web3.eth.defaultAccount, contractAddress).call();
+        
+        if (new web3.utils.BN(allowance).gte(new web3.utils.BN(ticketPriceWei))) {
+            console.log('Sufficient tokens already approved');
+        } else {
+            console.log('Not enough tokens approved, need to approve more');
+            approveButton.classList.remove('hidden');
+        }
     } catch (error) {
         console.error('Error connecting to MetaMask:', error);
     }
@@ -889,18 +906,18 @@ connectButton.addEventListener('click', async () => {
 
 approveButton.addEventListener('click', async () => {
     try {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        if (!accounts || accounts.length === 0) {
-            console.error('No accounts found');
-            return;
-        }
         const web3 = new Web3(window.ethereum);
+        const accounts = await web3.eth.getAccounts();
         web3.eth.defaultAccount = accounts[0];
-        // Approve the contract to spend the tokens on behalf of the user
-        await tokenInstance.methods.approve(contractAddress, web3.utils.toWei('100', 'ether')).send({ from: web3.eth.defaultAccount });
-        console.log('Tokens approved');
-        approveButton.classList.add('hidden');
-        buyTicketButton.classList.remove('hidden');
+
+        const ticketsToBuy = prompt("Enter the number of tickets you want to approve for:");
+        const ticketPriceWei = web3.utils.toWei('100', 'ether');
+        const totalCostWei = web3.utils.toBN(ticketPriceWei).mul(web3.utils.toBN(ticketsToBuy));
+
+        // Approve the contract to spend tokens on behalf of the user
+        await tokenInstance.methods.approve(contractAddress, totalCostWei.toString()).send({ from: web3.eth.defaultAccount });
+        console.log(`Approved ${ticketsToBuy} tickets worth of tokens.`);
+        approveButton.classList.add('hidden'); // Optionally hide the approve button after approval
     } catch (error) {
         console.error('Error approving tokens:', error);
     }
@@ -908,17 +925,26 @@ approveButton.addEventListener('click', async () => {
 
 buyTicketButton.addEventListener('click', async () => {
     try {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        if (!accounts || accounts.length === 0) {
-            console.error('No accounts found');
-            return;
-        }
         const web3 = new Web3(window.ethereum);
+        const accounts = await web3.eth.getAccounts();
         web3.eth.defaultAccount = accounts[0];
-        // Buy a ticket
-        await contractInstance.methods.buyTicket().send({ from: web3.eth.defaultAccount });
-        console.log('Ticket purchased');
+        // Here you could add a prompt or some UI element to let users select the number of tickets
+        const ticketsToBuy = prompt("Enter the number of tickets you want to buy:");
+
+        // Check if enough tokens are approved before buying
+        const ticketPriceWei = web3.utils.toWei('100', 'ether');
+        const totalCostWei = web3.utils.toBN(ticketPriceWei).mul(web3.utils.toBN(ticketsToBuy));
+        const allowance = await tokenInstance.methods.allowance(web3.eth.defaultAccount, contractAddress).call();
+
+        if (new web3.utils.BN(allowance).gte(totalCostWei)) {
+            // Buy the tickets
+            await contractInstance.methods.buyTicket(ticketsToBuy).send({ from: web3.eth.defaultAccount });
+            console.log(`Purchased ${ticketsToBuy} tickets.`);
+        } else {
+            console.error('Not enough allowance. Please approve more tokens.');
+        }
     } catch (error) {
         console.error('Error purchasing ticket:', error);
     }
 });
+
