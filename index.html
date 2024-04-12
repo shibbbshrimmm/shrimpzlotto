@@ -13,8 +13,10 @@
         <p>Connect your wallet, buy tickets, and win prizes!</p>
         <button id="connectButton">Connect to MetaMask</button>
         <div id="ticketSection" class="hidden">
+            <label for="ticketCount">Tickets to Buy:</label>
+            <input id="ticketCount" type="number" value="1" min="1">
             <button id="approveButton">Approve Tokens</button>
-            <button id="buyTicketButton" class="hidden">Buy Ticket</button>
+            <button id="buyTicketButton">Buy Ticket</button> <!-- Made visible at all times -->
         </div>
     </div>
     <script src="script.js"></script>
