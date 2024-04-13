@@ -883,15 +883,19 @@ const buyTicketButton = document.getElementById('buyTicketButton');
 
 connectButton.addEventListener('click', async () => {
     try {
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        // Make sure to pass the correct method for requesting accounts
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        if (!accounts || accounts.length === 0) {
+            console.error('No accounts found');
+            return;
+        }
         const web3 = new Web3(window.ethereum);
         contractInstance = new web3.eth.Contract(contractABI, contractAddress);
         tokenInstance = new web3.eth.Contract(tokenABI, tokenAddress);
         ticketSection.classList.remove('hidden');
 
-        // Check if the user has already approved enough tokens
         const ticketPriceWei = web3.utils.toWei('100', 'ether');
-        const allowance = await tokenInstance.methods.allowance(web3.eth.defaultAccount, contractAddress).call();
+        const allowance = await tokenInstance.methods.allowance(accounts[0], contractAddress).call();
         if (web3.utils.toBN(allowance).gte(web3.utils.toBN(ticketPriceWei))) {
             console.log('Sufficient tokens already approved');
             approveButton.classList.add('hidden');
@@ -906,15 +910,25 @@ connectButton.addEventListener('click', async () => {
     }
 });
 
-async function updateContractDetails() {
-  const ticketPrice = await contractInstance.methods.ticketPrice().call();
-  const maxTicketsPerWallet = await contractInstance.methods.maxTicketsPerAddress().call();
-  const totalMaxTickets = await contractInstance.methods.maxTickets().call();
 
-  document.getElementById('ticketPrice').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(ticketPrice, 'ether')} $SHRMIPZ`;
-  document.getElementById('maxTicketsPerWallet').getElementsByTagName('p')[0].innerText = maxTicketsPerWallet;
-  document.getElementById('totalMaxTickets').getElementsByTagName('p')[0].innerText = totalMaxTickets;
+async function updateContractDetails() {
+    if (!contractInstance || !tokenInstance) {
+        console.error('Contract instances are not initialized');
+        return;
+    }
+    try {
+        const ticketPrice = await contractInstance.methods.ticketPrice().call();
+        const maxTicketsPerWallet = await contractInstance.methods.maxTicketsPerAddress().call();
+        const totalMaxTickets = await contractInstance.methods.maxTickets().call();
+
+        document.getElementById('ticketPrice').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(ticketPrice, 'ether')} $SHRMIPZ`;
+        document.getElementById('maxTicketsPerWallet').getElementsByTagName('p')[0].innerText = maxTicketsPerWallet;
+        document.getElementById('totalMaxTickets').getElementsByTagName('p')[0].innerText = totalMaxTickets;
+    } catch (error) {
+        console.error('Error updating contract details:', error);
+    }
 }
+
 
 // Call this function when the page loads and after the user connects their wallet
 document.addEventListener('DOMContentLoaded', updateContractDetails);
