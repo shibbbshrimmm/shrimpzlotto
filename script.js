@@ -875,6 +875,41 @@ const tokenAddress = '0x4633841377513350FAF72Efc3c6e6f94F3BDD0F8'; // ERC20 toke
 
 let contractInstance;
 let tokenInstance;
+let web3;
+
+async function initWeb3() {
+    if (window.ethereum) {
+        web3 = new Web3(window.ethereum);
+        try {
+            // Request account access if needed
+            await window.ethereum.request({ method: 'eth_requestAccounts' });
+            // Accounts now exposed, you can start interacting with the contracts
+            contractInstance = new web3.eth.Contract(contractABI, contractAddress);
+            tokenInstance = new web3.eth.Contract(tokenABI, tokenAddress);
+            updateContractDetails();  // Call to update the contract details
+        } catch (error) {
+            console.error('User denied account access or failed to load contracts:', error);
+        }
+    } else {
+        console.error('Non-Ethereum browser detected. You should consider trying MetaMask!');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initWeb3);
+
+async function updateContractDetails() {
+    try {
+        const ticketPrice = await contractInstance.methods.ticketPrice().call();
+        const maxTicketsPerWallet = await contractInstance.methods.maxTicketsPerAddress().call();
+        const totalMaxTickets = await contractInstance.methods.maxTickets().call();
+
+        document.getElementById('ticketPrice').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(ticketPrice, 'ether')} ETH`;
+        document.getElementById('maxTicketsPerWallet').getElementsByTagName('p')[0].innerText = maxTicketsPerWallet;
+        document.getElementById('totalMaxTickets').getElementsByTagName('p')[0].innerText = totalMaxTickets;
+    } catch (error) {
+        console.error("Error fetching contract details:", error);
+    }
+}
 
 const connectButton = document.getElementById('connectButton');
 const ticketSection = document.getElementById('ticketSection');
@@ -882,16 +917,17 @@ const approveButton = document.getElementById('approveButton');
 const buyTicketButton = document.getElementById('buyTicketButton');
 
 connectButton.addEventListener('click', async () => {
-    try {
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const web3 = new Web3(window.ethereum);
-        contractInstance = new web3.eth.Contract(contractABI, contractAddress);
-        tokenInstance = new web3.eth.Contract(tokenABI, tokenAddress);
-        ticketSection.classList.remove('hidden');
+    ticketSection.classList.remove('hidden');
+    updateTokenApproval();
+});
 
-        // Check if the user has already approved enough tokens
-        const ticketPriceWei = web3.utils.toWei('100', 'ether');
-        const allowance = await tokenInstance.methods.allowance(web3.eth.defaultAccount, contractAddress).call();
+async function updateTokenApproval() {
+    const accounts = await web3.eth.getAccounts(); // Ensure to fetch accounts to set the default account
+    web3.eth.defaultAccount = accounts[0]; // Set the default account
+
+    try {
+        const ticketPriceWei = web3.utils.toWei('100', 'ether'); // Make sure this aligns with actual ticket price or dynamically fetch it
+        const allowance = await tokenInstance.methods.allowance(accounts[0], contractAddress).call();
         if (web3.utils.toBN(allowance).gte(web3.utils.toBN(ticketPriceWei))) {
             console.log('Sufficient tokens already approved');
             approveButton.classList.add('hidden');
@@ -902,34 +938,15 @@ connectButton.addEventListener('click', async () => {
             buyTicketButton.classList.add('hidden');
         }
     } catch (error) {
-        console.error('Error connecting to MetaMask:', error);
+        console.error('Error checking token allowance:', error);
     }
-});
-
-async function updateContractDetails() {
-  const ticketPrice = await contractInstance.methods.ticketPrice().call();
-  const maxTicketsPerWallet = await contractInstance.methods.maxTicketsPerAddress().call();
-  const totalMaxTickets = await contractInstance.methods.maxTickets().call();
-
-  document.getElementById('ticketPrice').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(ticketPrice, 'ether')} ETH`;
-  document.getElementById('maxTicketsPerWallet').getElementsByTagName('p')[0].innerText = maxTicketsPerWallet;
-  document.getElementById('totalMaxTickets').getElementsByTagName('p')[0].innerText = totalMaxTickets;
 }
 
-// Call this function when the page loads and after the user connects their wallet
-document.addEventListener('DOMContentLoaded', updateContractDetails);
-
 approveButton.addEventListener('click', async () => {
+    const accounts = await web3.eth.getAccounts();
+    const ticketPriceWei = web3.utils.toWei('100', 'ether'); // Adjust this to the actual ticket price
     try {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        if (!accounts || accounts.length === 0) {
-            console.error('No accounts found');
-            return;
-        }
-        const web3 = new Web3(window.ethereum);
-        web3.eth.defaultAccount = accounts[0];
-        // Approve the contract to spend tokens on behalf of the user
-        await tokenInstance.methods.approve(contractAddress, web3.utils.toWei('100', 'ether')).send({ from: web3.eth.defaultAccount });
+        await tokenInstance.methods.approve(contractAddress, ticketPriceWei).send({ from: accounts[0] });
         console.log('Tokens approved');
         approveButton.classList.add('hidden');
         buyTicketButton.classList.remove('hidden');
@@ -939,16 +956,9 @@ approveButton.addEventListener('click', async () => {
 });
 
 buyTicketButton.addEventListener('click', async () => {
+    const accounts = await web3.eth.getAccounts();
     try {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        if (!accounts || accounts.length === 0) {
-            console.error('No accounts found');
-            return;
-        }
-        const web3 = new Web3(window.ethereum);
-        web3.eth.defaultAccount = accounts[0];
-        // Buy a ticket
-        await contractInstance.methods.buyTicket().send({ from: web3.eth.defaultAccount });
+        await contractInstance.methods.buyTicket().send({ from: accounts[0] });
         console.log('Ticket purchased');
     } catch (error) {
         console.error('Error purchasing ticket:', error);
