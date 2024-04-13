@@ -902,26 +902,31 @@ async function updateContractDetails() {
     const ticketPrice = await contractInstance.methods.ticketPrice().call();
     const maxTicketsPerWallet = await contractInstance.methods.maxTicketsPerAddress().call();
     const totalMaxTickets = await contractInstance.methods.maxTickets().call();
-    const totalPrizePool = await contractInstance.methods.totalPrizePool().call(); // Get the total prize pool
+    const totalPrizePool = await contractInstance.methods.totalPrizePool().call(); // Get the total prize pool as a string
 
-    // Display the total prize pool
-    document.getElementById('prizePool').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(totalPrizePool, 'ether')} $SHRIMPZ`;
+    // Convert to BigNumber using Web3.js for safe arithmetic operations on big numbers
+    const totalPrizePoolBN = web3.utils.toBN(totalPrizePool);
+    const serviceFeePercentageBN = web3.utils.toBN(5); // 5% service fee
 
-    // Calculate the amounts for 1st, 2nd, and 3rd place based on the total prize pool
-    const firstPlacePercentage = 50;
-    const secondPlacePercentage = 30;
-    const thirdPlacePercentage = 20;
-    const serviceFeePercentage = 5;
+    // Calculate prize pool after service fee
+    const fee = totalPrizePoolBN.mul(serviceFeePercentageBN).div(web3.utils.toBN(100));
+    const prizePoolAfterFee = totalPrizePoolBN.sub(fee);
 
-    const prizePoolAfterFee = totalPrizePool * (1 - serviceFeePercentage / 100);
-    const firstPlaceAmount = prizePoolAfterFee * firstPlacePercentage / 100;
-    const secondPlaceAmount = prizePoolAfterFee * secondPlacePercentage / 100;
-    const thirdPlaceAmount = prizePoolAfterFee * thirdPlacePercentage / 100;
+    // Percentage allocations
+    const firstPlacePercentage = web3.utils.toBN(50); // 50%
+    const secondPlacePercentage = web3.utils.toBN(30); // 30%
+    const thirdPlacePercentage = web3.utils.toBN(20); // 20%
 
-    // Display the amounts for 1st, 2nd, and 3rd place
-    document.getElementById('firstPlace').getElementsByTagName('p')[0].innerText = `${firstPlaceAmount} $SHRIMPZ`;
-    document.getElementById('secondPlace').getElementsByTagName('p')[0].innerText = `${secondPlaceAmount} $SHRIMPZ`;
-    document.getElementById('thirdPlace').getElementsByTagName('p')[0].innerText = `${thirdPlaceAmount} $SHRIMPZ`;
+    // Calculating the prize amounts
+    const firstPlaceAmount = prizePoolAfterFee.mul(firstPlacePercentage).div(web3.utils.toBN(100));
+    const secondPlaceAmount = prizePoolAfterFee.mul(secondPlacePercentage).div(web3.utils.toBN(100));
+    const thirdPlaceAmount = prizePoolAfterFee.mul(thirdPlacePercentage).div(web3.utils.toBN(100));
+
+    // Display the values
+    document.getElementById('prizePool').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(totalPrizePoolBN.toString(), 'ether')} $SHRIMPZ`;
+    document.getElementById('firstPlace').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(firstPlaceAmount.toString(), 'ether')} $SHRIMPZ`;
+    document.getElementById('secondPlace').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(secondPlaceAmount.toString(), 'ether')} $SHRIMPZ`;
+    document.getElementById('thirdPlace').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(thirdPlaceAmount.toString(), 'ether')} $SHRIMPZ`;
 
     document.getElementById('ticketPrice').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(ticketPrice, 'ether')} $SHRIMPZ`;
     document.getElementById('maxTicketsPerWallet').getElementsByTagName('p')[0].innerText = maxTicketsPerWallet;
