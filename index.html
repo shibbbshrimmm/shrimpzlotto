@@ -9,14 +9,31 @@
 </head>
 <body>
     <div class="container">
-        <h1>Shrimpz Lottery</h1>
-        <p>Connect your wallet, buy tickets, and win prizes!</p>
-        <button id="connectButton">Connect to MetaMask</button>
-        <div id="ticketSection" class="hidden">
-            <label for="ticketCount">Tickets to Buy:</label>
-            <input id="ticketCount" type="number" value="1" min="1">
-            <button id="approveButton">Approve Tokens</button>
-            <button id="buyTicketButton">Buy Ticket</button> <!-- Made visible at all times -->
+        <div class="info">
+            <h1>Welcome to Shrimpz Lottery!</h1>
+            <p>Connect your wallet and take a chance to win big. The rules are simple and transparent.</p>
+            <div class="data-container">
+                <div id="ticketPrice" class="data-box">
+                    <h2>Ticket Price</h2>
+                    <p>Loading...</p>
+                </div>
+                <div id="maxTicketsPerWallet" class="data-box">
+                    <h2>Max Tickets Per Wallet</h2>
+                    <p>Loading...</p>
+                </div>
+                <div id="totalMaxTickets" class="data-box">
+                    <h2>Total Max Tickets</h2>
+                    <p>Loading...</p>
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <h2>Buy Your Ticket Now</h2>
+            <button id="connectButton">Connect to MetaMask</button>
+            <div id="ticketSection" class="hidden">
+                <button id="approveButton">Approve Tokens</button>
+                <button id="buyTicketButton">Buy Ticket</button>
+            </div>
         </div>
     </div>
     <script src="script.js"></script>
