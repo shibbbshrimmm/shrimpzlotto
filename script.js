@@ -902,10 +902,19 @@ async function updateContractDetails() {
         const ticketPrice = await contractInstance.methods.ticketPrice().call();
         const maxTicketsPerWallet = await contractInstance.methods.maxTicketsPerAddress().call();
         const totalMaxTickets = await contractInstance.methods.maxTickets().call();
+        const prizePool = await contractInstance.methods.totalPrizePool().call();
+        const firstPlacePercentage = await contractInstance.methods.FIRST_PLACE_PERCENTAGE().call();
+        const secondPlacePercentage = await contractInstance.methods.SECOND_PLACE_PERCENTAGE().call();
+        const thirdPlacePercentage = await contractInstance.methods.THIRD_PLACE_PERCENTAGE().call();
 
-        document.getElementById('ticketPrice').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(ticketPrice, 'ether')} ETH`;
+        document.getElementById('ticketPrice').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(ticketPrice, 'ether')} $SHRMIPZ`;
         document.getElementById('maxTicketsPerWallet').getElementsByTagName('p')[0].innerText = maxTicketsPerWallet;
         document.getElementById('totalMaxTickets').getElementsByTagName('p')[0].innerText = totalMaxTickets;
+        document.getElementById('prizePool').getElementsByTagName('p')[0].innerText = prizePool;
+        document.getElementById('firstPlacePercentage').getElementsByTagName('p')[0].innerText = firstPlacePercentage;
+        document.getElementById('secondPlacePercentage').getElementsByTagName('p')[0].innerText = secondPlacePercentage;
+        document.getElementById('thirdPlacePercentage').getElementsByTagName('p')[0].innerText = thirdPlacePercentage;
+      
     } catch (error) {
         console.error("Error fetching contract details:", error);
     }
