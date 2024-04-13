@@ -903,7 +903,7 @@ async function updateContractDetails() {
         const maxTicketsPerWallet = await contractInstance.methods.maxTicketsPerAddress().call();
         const totalMaxTickets = await contractInstance.methods.maxTickets().call();
 
-        document.getElementById('ticketPrice').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(ticketPrice, 'ether')} ETH`;
+        document.getElementById('ticketPrice').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(ticketPrice, 'ether')} $SHRIMPZ`;
         document.getElementById('maxTicketsPerWallet').getElementsByTagName('p')[0].innerText = maxTicketsPerWallet;
         document.getElementById('totalMaxTickets').getElementsByTagName('p')[0].innerText = totalMaxTickets;
     } catch (error) {
