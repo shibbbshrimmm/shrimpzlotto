@@ -876,6 +876,35 @@ const tokenAddress = '0x4633841377513350FAF72Efc3c6e6f94F3BDD0F8'; // ERC20 toke
 let contractInstance;
 let tokenInstance;
 
+document.addEventListener('DOMContentLoaded', async () => {
+    if (typeof window.ethereum !== 'undefined') {
+        try {
+            const web3 = new Web3(window.ethereum);
+            await window.ethereum.request({ method: 'eth_requestAccounts' }); // Request access
+            contractInstance = new web3.eth.Contract(contractABI, contractAddress);
+            tokenInstance = new web3.eth.Contract(tokenABI, tokenAddress);
+            updateContractDetails();
+        } catch (error) {
+            console.error("Error connecting to MetaMask:", error);
+        }
+    } else {
+        console.error('Non-Ethereum browser detected. You should consider trying MetaMask!');
+    }
+});
+
+async function updateContractDetails() {
+    try {
+        const ticketPrice = await contractInstance.methods.ticketPrice().call();
+        const maxTicketsPerWallet = await contractInstance.methods.maxTicketsPerAddress().call();
+        const totalMaxTickets = await contractInstance.methods.maxTickets().call();
+
+        document.getElementById('ticketPrice').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(ticketPrice, 'ether')} ETH`;
+        document.getElementById('maxTicketsPerWallet').getElementsByTagName('p')[0].innerText = maxTicketsPerWallet;
+        document.getElementById('totalMaxTickets').getElementsByTagName('p')[0].innerText = totalMaxTickets;
+    } catch (error) {
+        console.error("Error fetching contract details:", error);
+    }
+}
 const connectButton = document.getElementById('connectButton');
 const ticketSection = document.getElementById('ticketSection');
 const approveButton = document.getElementById('approveButton');
@@ -905,19 +934,6 @@ connectButton.addEventListener('click', async () => {
         console.error('Error connecting to MetaMask:', error);
     }
 });
-
-async function updateContractDetails() {
-  const ticketPrice = await contractInstance.methods.ticketPrice().call();
-  const maxTicketsPerWallet = await contractInstance.methods.maxTicketsPerAddress().call();
-  const totalMaxTickets = await contractInstance.methods.maxTickets().call();
-
-  document.getElementById('ticketPrice').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(ticketPrice, 'ether')} ETH`;
-  document.getElementById('maxTicketsPerWallet').getElementsByTagName('p')[0].innerText = maxTicketsPerWallet;
-  document.getElementById('totalMaxTickets').getElementsByTagName('p')[0].innerText = totalMaxTickets;
-}
-
-// Call this function when the page loads and after the user connects their wallet
-document.addEventListener('DOMContentLoaded', updateContractDetails);
 
 approveButton.addEventListener('click', async () => {
     try {
