@@ -964,4 +964,3 @@ buyTicketButton.addEventListener('click', async () => {
         console.error('Error purchasing ticket:', error);
     }
 });
-
