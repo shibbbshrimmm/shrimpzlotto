@@ -903,17 +903,27 @@ async function updateContractDetails() {
         const maxTicketsPerWallet = await contractInstance.methods.maxTicketsPerAddress().call();
         const totalMaxTickets = await contractInstance.methods.maxTickets().call();
         const prizePool = await contractInstance.methods.totalPrizePool().call();
+        const prizePoolWhole = web3.utils.fromWei(prizePool, 'ether');
         const firstPlacePercentage = await contractInstance.methods.FIRST_PLACE_PERCENTAGE().call();
         const secondPlacePercentage = await contractInstance.methods.SECOND_PLACE_PERCENTAGE().call();
         const thirdPlacePercentage = await contractInstance.methods.THIRD_PLACE_PERCENTAGE().call();
+        const feePercentage = await contractInstance.methods.serviceFeePercentage().call();
+        const prizePoolAfterFee = prizePoolWhole - (prizePoolWhole * (feePercentage / 100));
 
-        document.getElementById('ticketPrice').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(ticketPrice, 'ether')} $SHRMIPZ`;
+        const firstPlacePrize = prizePoolAfterFee * (firstPlacePercentage / 100);
+        const secondPlacePrize = prizePoolAfterFee * (secondPlacePercentage / 100);
+        const thirdPlacePrize = prizePoolAfterFee * (thirdPlacePercentage / 100);
+
+        document.getElementById('ticketPrice').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(ticketPrice, 'ether')} $SHRIMPZ`;
         document.getElementById('maxTicketsPerWallet').getElementsByTagName('p')[0].innerText = maxTicketsPerWallet;
         document.getElementById('totalMaxTickets').getElementsByTagName('p')[0].innerText = totalMaxTickets;
-        document.getElementById('prizePool').getElementsByTagName('p')[0].innerText = prizePool;
-        document.getElementById('firstPlacePercentage').getElementsByTagName('p')[0].innerText = firstPlacePercentage;
-        document.getElementById('secondPlacePercentage').getElementsByTagName('p')[0].innerText = secondPlacePercentage;
-        document.getElementById('thirdPlacePercentage').getElementsByTagName('p')[0].innerText = thirdPlacePercentage;
+        document.getElementById('prizePoolWhole').getElementsByTagName('p')[0].innerText = `${prizePoolWhole} $SHRIMPZ`;
+        
+        document.getElementById('firstPlace').getElementsByTagName('p')[0].innerText = `Percentage: ${firstPlacePercentage}% | Value: ${firstPlacePrize} $SHRIMPZ`;
+        document.getElementById('secondPlace').getElementsByTagName('p')[0].innerText = `Percentage: ${secondPlacePercentage}% | Value: ${secondPlacePrize} $SHRIMPZ`;
+        document.getElementById('thirdPlace').getElementsByTagName('p')[0].innerText = `Percentage: ${thirdPlacePercentage}% | Value: ${thirdPlacePrize} $SHRIMPZ`;
+      
+        document.getElementById('feePercentage').getElementsByTagName('p')[0].innerText = `${feePercentage}%`;
       
     } catch (error) {
         console.error("Error fetching contract details:", error);
