@@ -911,7 +911,6 @@ async function updateContractDetails() {
     }
 }
 
-// Removed the redundant web3 initialization from these functions
 const connectButton = document.getElementById('connectButton');
 const ticketSection = document.getElementById('ticketSection');
 const approveButton = document.getElementById('approveButton');
@@ -923,9 +922,12 @@ connectButton.addEventListener('click', async () => {
 });
 
 async function updateTokenApproval() {
+    const accounts = await web3.eth.getAccounts(); // Ensure to fetch accounts to set the default account
+    web3.eth.defaultAccount = accounts[0]; // Set the default account
+
     try {
         const ticketPriceWei = web3.utils.toWei('100', 'ether'); // Make sure this aligns with actual ticket price or dynamically fetch it
-        const allowance = await tokenInstance.methods.allowance(web3.eth.defaultAccount, contractAddress).call();
+        const allowance = await tokenInstance.methods.allowance(accounts[0], contractAddress).call();
         if (web3.utils.toBN(allowance).gte(web3.utils.toBN(ticketPriceWei))) {
             console.log('Sufficient tokens already approved');
             approveButton.classList.add('hidden');
@@ -941,9 +943,10 @@ async function updateTokenApproval() {
 }
 
 approveButton.addEventListener('click', async () => {
+    const accounts = await web3.eth.getAccounts();
+    const ticketPriceWei = web3.utils.toWei('100', 'ether'); // Adjust this to the actual ticket price
     try {
-        const ticketPriceWei = web3.utils.toWei('100', 'ether'); // Adjust this to actual ticket price
-        await tokenInstance.methods.approve(contractAddress, ticketPriceWei).send({ from: web3.eth.defaultAccount });
+        await tokenInstance.methods.approve(contractAddress, ticketPriceWei).send({ from: accounts[0] });
         console.log('Tokens approved');
         approveButton.classList.add('hidden');
         buyTicketButton.classList.remove('hidden');
@@ -953,8 +956,9 @@ approveButton.addEventListener('click', async () => {
 });
 
 buyTicketButton.addEventListener('click', async () => {
+    const accounts = await web3.eth.getAccounts();
     try {
-        await contractInstance.methods.buyTicket().send({ from: web3.eth.defaultAccount });
+        await contractInstance.methods.buyTicket().send({ from: accounts[0] });
         console.log('Ticket purchased');
     } catch (error) {
         console.error('Error purchasing ticket:', error);
