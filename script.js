@@ -898,17 +898,37 @@ async function initWeb3() {
 document.addEventListener('DOMContentLoaded', initWeb3);
 
 async function updateContractDetails() {
-    try {
-        const ticketPrice = await contractInstance.methods.ticketPrice().call();
-        const maxTicketsPerWallet = await contractInstance.methods.maxTicketsPerAddress().call();
-        const totalMaxTickets = await contractInstance.methods.maxTickets().call();
+  try {
+    const ticketPrice = await contractInstance.methods.ticketPrice().call();
+    const maxTicketsPerWallet = await contractInstance.methods.maxTicketsPerAddress().call();
+    const totalMaxTickets = await contractInstance.methods.maxTickets().call();
+    const totalPrizePool = await contractInstance.methods.totalPrizePool().call(); // Get the total prize pool
 
-        document.getElementById('ticketPrice').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(ticketPrice, 'ether')} $SHRIMPZ`;
-        document.getElementById('maxTicketsPerWallet').getElementsByTagName('p')[0].innerText = maxTicketsPerWallet;
-        document.getElementById('totalMaxTickets').getElementsByTagName('p')[0].innerText = totalMaxTickets;
-    } catch (error) {
-        console.error("Error fetching contract details:", error);
-    }
+    // Display the total prize pool
+    document.getElementById('prizePool').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(totalPrizePool, 'ether')} $SHRIMPZ`;
+
+    // Calculate the amounts for 1st, 2nd, and 3rd place based on the total prize pool
+    const firstPlacePercentage = 50;
+    const secondPlacePercentage = 30;
+    const thirdPlacePercentage = 20;
+    const serviceFeePercentage = 5;
+
+    const prizePoolAfterFee = totalPrizePool * (1 - serviceFeePercentage / 100);
+    const firstPlaceAmount = prizePoolAfterFee * firstPlacePercentage / 100;
+    const secondPlaceAmount = prizePoolAfterFee * secondPlacePercentage / 100;
+    const thirdPlaceAmount = prizePoolAfterFee * thirdPlacePercentage / 100;
+
+    // Display the amounts for 1st, 2nd, and 3rd place
+    document.getElementById('firstPlace').getElementsByTagName('p')[0].innerText = `${firstPlaceAmount} $SHRIMPZ`;
+    document.getElementById('secondPlace').getElementsByTagName('p')[0].innerText = `${secondPlaceAmount} $SHRIMPZ`;
+    document.getElementById('thirdPlace').getElementsByTagName('p')[0].innerText = `${thirdPlaceAmount} $SHRIMPZ`;
+
+    document.getElementById('ticketPrice').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(ticketPrice, 'ether')} $SHRIMPZ`;
+    document.getElementById('maxTicketsPerWallet').getElementsByTagName('p')[0].innerText = maxTicketsPerWallet;
+    document.getElementById('totalMaxTickets').getElementsByTagName('p')[0].innerText = totalMaxTickets;
+  } catch (error) {
+    console.error('Error updating contract details:', error);
+  }
 }
 
 const connectButton = document.getElementById('connectButton');
