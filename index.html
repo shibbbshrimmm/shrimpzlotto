@@ -8,34 +8,51 @@
     <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="info">
-            <h1>Welcome to Shrimpz Lottery!</h1>
-            <p>Connect your wallet and take a chance to win big. The rules are simple and transparent.</p>
-            <div class="data-container">
-                <div id="ticketPrice" class="data-box">
-                    <h2>Ticket Price</h2>
-                    <p>Loading...</p>
-                </div>
-                <div id="maxTicketsPerWallet" class="data-box">
-                    <h2>Max Tickets Per Wallet</h2>
-                    <p>Loading...</p>
-                </div>
-                <div id="totalMaxTickets" class="data-box">
-                    <h2>Total Max Tickets</h2>
-                    <p>Loading...</p>
-                </div>
+    <header>
+        <h1>ShrimpzLotto</h1>
+    </header>
+    <main>
+        <section class="info">
+            <div id="prizePool" class="data-box">
+                <h2>Prize Pool</h2>
+                <p>Loading...</p>
             </div>
-        </div>
-        <div class="actions">
+            <div id="firstPlace" class="data-box">
+                <h2>1st Place</h2>
+                <p>Loading...</p>
+            </div>
+            <div id="secondPlace" class="data-box">
+                <h2>2nd Place</h2>
+                <p>Loading...</p>
+            </div>
+            <div id="thirdPlace" class="data-box">
+                <h2>3rd Place</h2>
+                <p>Loading...</p>
+            </div>
+        </section>
+        <section class="data-container">
+            <div class="data-box">
+                <h2>Total Tickets</h2>
+                <p>Loading...</p>
+            </div>
+            <div class="data-box">
+                <h2>Max Tickets Per Wallet</h2>
+                <p>Loading...</p>
+            </div>
+            <div class="data-box">
+                <h2>Ticket Price</h2>
+                <p>Loading...</p>
+            </div>
+        </section>
+        <section class="actions">
             <h2>Buy Your Ticket Now</h2>
             <button id="connectButton">Connect to MetaMask</button>
             <div id="ticketSection" class="hidden">
                 <button id="approveButton">Approve Tokens</button>
                 <button id="buyTicketButton">Buy Ticket</button>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
     <script src="script.js"></script>
 </body>
 </html>
