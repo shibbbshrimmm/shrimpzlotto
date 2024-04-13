@@ -903,26 +903,25 @@ async function updateContractDetails() {
         const maxTicketsPerWallet = await contractInstance.methods.maxTicketsPerAddress().call();
         const totalMaxTickets = await contractInstance.methods.maxTickets().call();
         const prizePool = await contractInstance.methods.totalPrizePool().call();
-        const prizePoolWhole = web3.utils.fromWei(prizePool, 'ether');
+        const prizePoolWhole = BigInt(prizePool); // Convert to BigInt
         const firstPlacePercentage = await contractInstance.methods.FIRST_PLACE_PERCENTAGE().call();
         const secondPlacePercentage = await contractInstance.methods.SECOND_PLACE_PERCENTAGE().call();
         const thirdPlacePercentage = await contractInstance.methods.THIRD_PLACE_PERCENTAGE().call();
         const feePercentage = await contractInstance.methods.serviceFeePercentage().call();
-        const prizePoolAfterFee = prizePoolWhole - (prizePoolWhole * (feePercentage / 100));
+        const prizePoolAfterFee = prizePoolWhole - (prizePoolWhole * BigInt(feePercentage) / BigInt(100)); // Convert feePercentage to BigInt
 
-        const firstPlacePrize = prizePoolAfterFee * (firstPlacePercentage / 100);
-        const secondPlacePrize = prizePoolAfterFee * (secondPlacePercentage / 100);
-        const thirdPlacePrize = prizePoolAfterFee * (thirdPlacePercentage / 100);
+        const firstPlacePrize = prizePoolAfterFee * BigInt(firstPlacePercentage) / BigInt(100); // Convert firstPlacePercentage to BigInt
+        const secondPlacePrize = prizePoolAfterFee * BigInt(secondPlacePercentage) / BigInt(100); // Convert secondPlacePercentage to BigInt
+        const thirdPlacePrize = prizePoolAfterFee * BigInt(thirdPlacePercentage) / BigInt(100); // Convert thirdPlacePercentage to BigInt
 
         document.getElementById('ticketPrice').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(ticketPrice, 'ether')} $SHRIMPZ`;
         document.getElementById('maxTicketsPerWallet').getElementsByTagName('p')[0].innerText = maxTicketsPerWallet;
         document.getElementById('totalMaxTickets').getElementsByTagName('p')[0].innerText = totalMaxTickets;
-        document.getElementById('prizePoolWhole').getElementsByTagName('p')[0].innerText = `${prizePoolWhole} $SHRIMPZ`;
+        document.getElementById('prizePoolWhole').getElementsByTagName('p')[0].innerText = `${web3.utils.fromWei(prizePoolWhole.toString(), 'ether')} $SHRIMPZ`; // Convert prizePoolWhole to string before converting to ether
         
-        document.getElementById('firstPlace').getElementsByTagName('p')[0].innerText = `Percentage: ${firstPlacePercentage}% | Value: ${firstPlacePrize} $SHRIMPZ`;
-        document.getElementById('secondPlace').getElementsByTagName('p')[0].innerText = `Percentage: ${secondPlacePercentage}% | Value: ${secondPlacePrize} $SHRIMPZ`;
-        document.getElementById('thirdPlace').getElementsByTagName('p')[0].innerText = `Percentage: ${thirdPlacePercentage}% | Value: ${thirdPlacePrize} $SHRIMPZ`;
-      
+        document.getElementById('firstPlace').getElementsByTagName('p')[0].innerText = `Percentage: ${firstPlacePercentage}% | Value: ${web3.utils.fromWei(firstPlacePrize.toString(), 'ether')} $SHRIMPZ`; // Convert firstPlacePrize to string before converting to ether
+        document.getElementById('secondPlace').getElementsByTagName('p')[0].innerText = `Percentage: ${secondPlacePercentage}% | Value: ${web3.utils.fromWei(secondPlacePrize.toString(), 'ether')} $SHRIMPZ`; // Convert secondPlacePrize to string before converting to ether
+        document.getElementById('thirdPlace').getElementsByTagName('p')[0].innerText = `Percentage: ${thirdPlacePercentage}% | Value: ${web3.utils.fromWei(thirdPlacePrize.toString(), 'ether')} $SHRIMPZ`; // Convert thirdPlacePrize to string before converting to ether
         document.getElementById('feePercentage').getElementsByTagName('p')[0].innerText = `${feePercentage}%`;
       
     } catch (error) {
